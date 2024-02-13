@@ -1,0 +1,75 @@
+{
+  "name": "NftMembershipApp",
+  "desc": "",
+  "methods": [
+    {
+      "name": "authorizeCreator",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "createApplication",
+      "args": [
+        {
+          "name": "membershipPrice",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "createMembershipNft",
+      "desc": "A method that creates the Membership NFTTODO: should the asset total be a power of 10? and should the decimals be 0?",
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "total",
+          "type": "uint64"
+        },
+        {
+          "name": "unitName",
+          "type": "string"
+        },
+        {
+          "name": "assetUrl",
+          "type": "string"
+        }
+      ],
+      "returns": {
+        "type": "uint64"
+      }
+    },
+    {
+      "name": "getMembership",
+      "desc": "A method that allows a user to purchase a membership",
+      "args": [
+        {
+          "name": "payment",
+          "type": "pay"
+        },
+        {
+          "name": "nftOptIn",
+          "type": "axfer"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "cancelMembership",
+      "desc": "A method that allows a user to cancel their membership",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    }
+  ]
+}
