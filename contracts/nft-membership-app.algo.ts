@@ -10,7 +10,7 @@ class NftMembershipApp extends Contract {
 
   memberInfo = BoxMap<Address, boolean>();
 
-  authorizeCreator(): void {
+  private authorizeCreator(): void {
     assert(this.app.creator === this.txn.sender);
   }
 
@@ -21,8 +21,6 @@ class NftMembershipApp extends Contract {
   /**
    * A method that creates the Membership NFT
    *
-   * TODO: should the asset total be a power of 10? and should the decimals be 0?
-   *
    * @param name
    * @param total
    * @param unitName
@@ -30,7 +28,7 @@ class NftMembershipApp extends Contract {
    */
   createMembershipNft(name: string, total: uint64, unitName: string, assetUrl: string): Asset {
     this.authorizeCreator();
-    // Create a new NFT
+
     const createdAsset = sendAssetCreation({
       configAssetName: name,
       configAssetTotal: total,
@@ -42,7 +40,6 @@ class NftMembershipApp extends Contract {
       configAssetManager: this.app.address,
       configAssetReserve: this.app.address,
       configAssetFreeze: this.app.address,
-      fee: 0,
     });
 
     this.membershipNft.value = createdAsset;
@@ -57,19 +54,25 @@ class NftMembershipApp extends Contract {
    */
   getMembership(payment: PayTxn, nftOptIn: AssetTransferTxn): void {
     assert(this.membershipNft.exists);
-    assert(payment.amount === this.membershipPrice.value + BOX_COST);
-    assert(payment.receiver === this.app.address);
-    assert(payment.sender === this.txn.sender);
-    // assert(nftOptIn.assetAmount === 0);
-    // assert(nftOptIn.assetReceiver === nftOptIn.assetSender);
-    // assert(nftOptIn.xferAsset.id === this.membershipNft.value.id);
+
+    verifyPayTxn(payment, {
+      amount: this.membershipPrice.value + BOX_COST,
+      receiver: this.app.address,
+      sender: this.txn.sender,
+    });
+
+    verifyAssetTransferTxn(nftOptIn, {
+      sender: this.txn.sender,
+      xferAsset: this.membershipNft.value,
+      assetAmount: 0,
+      assetReceiver: this.txn.sender,
+    });
 
     sendAssetTransfer({
       xferAsset: this.membershipNft.value,
       assetAmount: 1,
       assetSender: this.app.address,
       assetReceiver: this.txn.sender,
-      fee: 0,
     });
 
     this.memberInfo(this.txn.sender).value = true;
@@ -89,7 +92,6 @@ class NftMembershipApp extends Contract {
       assetAmount: 1,
       assetSender: this.txn.sender,
       assetReceiver: this.app.address,
-      fee: 0,
     });
 
     this.memberInfo(this.txn.sender).delete();
@@ -99,7 +101,6 @@ class NftMembershipApp extends Contract {
     sendPayment({
       amount: refundAmount,
       receiver: this.txn.sender,
-      fee: 0,
     });
   }
 }

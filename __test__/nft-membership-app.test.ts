@@ -1,24 +1,23 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-unused-vars */
 import { describe, test, expect, beforeAll, beforeEach } from '@jest/globals';
 import { algorandFixture } from '@algorandfoundation/algokit-utils/testing';
 import algosdk from 'algosdk';
 import * as algokit from '@algorandfoundation/algokit-utils';
-import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount';
 import { NftMembershipAppClient } from '../contracts/clients/NftMembershipAppClient';
 
 const fixture = algorandFixture();
 
 let appClient: NftMembershipAppClient;
 let appAddr: string;
-let appId: number | bigint;
 let algod: algosdk.Algodv2;
+let appId: number | bigint;
 let testAccount: algosdk.Account;
+let membershipNft: bigint | undefined;
 const BOX_COST = 2500 + 400 * (1 + 32);
 
 describe('NftMembershipApp', () => {
   beforeEach(fixture.beforeEach);
-  // beforeEach(() => {
-  //   sharedState
-  // })
 
   beforeAll(async () => {
     await fixture.beforeEach();
@@ -34,6 +33,7 @@ describe('NftMembershipApp', () => {
       algod
     );
 
+    // Membership Price is 1 Algo or 1_000_000 microAlgos
     const appInfo = await appClient.create.createApplication({ membershipPrice: 1000000 });
 
     appAddr = appInfo.appAddress;
@@ -47,12 +47,8 @@ describe('NftMembershipApp', () => {
       },
       algod
     );
-
-    const globalState = await appClient.getGlobalState();
-    expect(globalState.membershipPrice?.asNumber()).toBe(1000000);
   });
 
-  // create nft
   test('Create a membership NFT', async () => {
     const name = 'Membership NFT';
     const total = 1000;
@@ -79,8 +75,13 @@ describe('NftMembershipApp', () => {
       { sendParams: { fee: algokit.transactionFees(2) } }
     );
 
+    membershipNft = createdAsset.return?.valueOf();
     const globalState = await appClient.getGlobalState();
-    expect(globalState.membershipNft).toBeDefined();
+
+    // Check if membershipNft global state was defined
+    expect(globalState.membershipNft?.asNumber()).toBeGreaterThan(0);
+
+    // Check if membership NFT was properly created
     expect(createdAsset.return?.valueOf()).toBeDefined();
   });
 
@@ -94,27 +95,62 @@ describe('NftMembershipApp', () => {
       amount: 1000000 + BOX_COST,
     });
 
-    const globalState = await appClient.getGlobalState();
-    const membershipNftId = globalState.membershipNft?.asNumber();
-    console.log('membership nft id ', membershipNftId);
-
     const optIntoNft = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: testAccount.addr,
       to: testAccount.addr,
       suggestedParams: sp,
-      assetIndex: Number(membershipNftId),
+      assetIndex: Number(membershipNft),
       amount: 0,
     });
 
     await appClient.getMembership(
       { payment: paymentTxn, nftOptIn: optIntoNft },
-      { sendParams: { fee: algokit.transactionFees(2) } }
+      { sendParams: { fee: algokit.transactionFees(2), populateAppCallResources: true } }
     );
-    const memberInfo = await appClient.appClient.getBoxValue(testAccount.addr);
+
+    const memberInfo = await appClient.appClient.getBoxValueFromABIType(
+      algosdk.decodeAddress(testAccount.addr).publicKey,
+      new algosdk.ABIBoolType()
+    );
     const accountInfo = await algod.accountInformation(testAccount.addr).do();
-    console.log(accountInfo);
-    expect(memberInfo).toBe(true);
+    const assetList = accountInfo.assets;
+    const indexedAssetList = assetList.reduce((acc: any, obj: any) => {
+      acc[obj['asset-id']] = obj;
+      return acc;
+    }, {});
+
+    // Check if the test account received the membership Nft
+    expect(indexedAssetList[Number(membershipNft)].amount).toBe(1);
+
+    // Check if the account's member box storage is created and the deposited value is set to true.
+    expect(memberInfo.valueOf()).toBe(true);
   });
 
   // cancel membership
+  test('Cancel Membership', async () => {
+    await appClient.cancelMembership(
+      {},
+      {
+        sendParams: {
+          fee: algokit.transactionFees(3),
+          populateAppCallResources: true,
+        },
+      }
+    );
+
+    const accountInfo = await algod.accountInformation(testAccount.addr).do();
+    const assetList = accountInfo.assets;
+    const indexedAssetList = assetList.reduce((acc: any, obj: any) => {
+      acc[obj['asset-id']] = obj;
+      return acc;
+    }, {});
+
+    const memberBoxList = await appClient.appClient.getBoxNames();
+
+    // Check if test account no longer has the membership NFT
+    expect(indexedAssetList[Number(membershipNft)].amount).toBe(0);
+
+    // Check if the member box storage is deleted on the smart contract
+    expect(memberBoxList.length).toBe(0);
+  });
 });

@@ -21,12 +21,6 @@ switch call_NoOp NOT_IMPLEMENTED NOT_IMPLEMENTED NOT_IMPLEMENTED NOT_IMPLEMENTED
 NOT_IMPLEMENTED:
 	err
 
-abi_route_authorizeCreator:
-	// execute authorizeCreator()void
-	callsub authorizeCreator
-	int 1
-	return
-
 // authorizeCreator()void
 authorizeCreator:
 	proto 0 0
@@ -94,8 +88,6 @@ abi_route_createMembershipNft:
 //
 // A method that creates the Membership NFT
 //
-// TODO: should the asset total be a power of 10? and should the decimals be 0?
-//
 // @param name
 // @param total
 // @param unitName
@@ -106,11 +98,11 @@ createMembershipNft:
 	// Push empty bytes after the frame pointer to reserve space for local variables
 	byte 0x
 
-	// contracts/nft-membership-app.algo.ts:32
+	// contracts/nft-membership-app.algo.ts:30
 	// this.authorizeCreator()
 	callsub authorizeCreator
 
-	// contracts/nft-membership-app.algo.ts:34
+	// contracts/nft-membership-app.algo.ts:32
 	// createdAsset = sendAssetCreation({
 	//       configAssetName: name,
 	//       configAssetTotal: total,
@@ -122,64 +114,62 @@ createMembershipNft:
 	//       configAssetManager: this.app.address,
 	//       configAssetReserve: this.app.address,
 	//       configAssetFreeze: this.app.address,
-	//       fee: 0,
 	//     })
 	itxn_begin
 	int acfg
 	itxn_field TypeEnum
 
-	// contracts/nft-membership-app.algo.ts:35
+	// contracts/nft-membership-app.algo.ts:33
 	// configAssetName: name
 	frame_dig -1 // name: string
 	itxn_field ConfigAssetName
 
-	// contracts/nft-membership-app.algo.ts:36
+	// contracts/nft-membership-app.algo.ts:34
 	// configAssetTotal: total
 	frame_dig -2 // total: uint64
 	itxn_field ConfigAssetTotal
 
-	// contracts/nft-membership-app.algo.ts:37
+	// contracts/nft-membership-app.algo.ts:35
 	// configAssetDecimals: 0
 	int 0
 	itxn_field ConfigAssetDecimals
 
-	// contracts/nft-membership-app.algo.ts:38
+	// contracts/nft-membership-app.algo.ts:36
 	// configAssetUnitName: unitName
 	frame_dig -3 // unitName: string
 	itxn_field ConfigAssetUnitName
 
-	// contracts/nft-membership-app.algo.ts:39
+	// contracts/nft-membership-app.algo.ts:37
 	// configAssetURL: assetUrl
 	frame_dig -4 // assetUrl: string
 	itxn_field ConfigAssetURL
 
-	// contracts/nft-membership-app.algo.ts:40
+	// contracts/nft-membership-app.algo.ts:38
 	// configAssetClawback: this.app.address
 	global CurrentApplicationAddress
 	itxn_field ConfigAssetClawback
 
-	// contracts/nft-membership-app.algo.ts:41
+	// contracts/nft-membership-app.algo.ts:39
 	// configAssetDefaultFrozen: 1
 	int 1
 	itxn_field ConfigAssetDefaultFrozen
 
-	// contracts/nft-membership-app.algo.ts:42
+	// contracts/nft-membership-app.algo.ts:40
 	// configAssetManager: this.app.address
 	global CurrentApplicationAddress
 	itxn_field ConfigAssetManager
 
-	// contracts/nft-membership-app.algo.ts:43
+	// contracts/nft-membership-app.algo.ts:41
 	// configAssetReserve: this.app.address
 	global CurrentApplicationAddress
 	itxn_field ConfigAssetReserve
 
-	// contracts/nft-membership-app.algo.ts:44
+	// contracts/nft-membership-app.algo.ts:42
 	// configAssetFreeze: this.app.address
 	global CurrentApplicationAddress
 	itxn_field ConfigAssetFreeze
 
-	// contracts/nft-membership-app.algo.ts:45
-	// fee: 0
+	// Fee field not set, defaulting to 0
 	int 0
 	itxn_field Fee
 
@@ -188,13 +178,13 @@ createMembershipNft:
 	itxn CreatedAssetID
 	frame_bury 0 // createdAsset: asset
 
-	// contracts/nft-membership-app.algo.ts:48
+	// contracts/nft-membership-app.algo.ts:45
 	// this.membershipNft.value = createdAsset
 	byte 0x6d656d626572736869704e6674 // "membershipNft"
 	frame_dig 0 // createdAsset: asset
 	app_global_put
 
-	// contracts/nft-membership-app.algo.ts:50
+	// contracts/nft-membership-app.algo.ts:47
 	// return createdAsset;
 	frame_dig 0 // createdAsset: asset
 
@@ -236,7 +226,7 @@ abi_route_getMembership:
 getMembership:
 	proto 2 0
 
-	// contracts/nft-membership-app.algo.ts:59
+	// contracts/nft-membership-app.algo.ts:56
 	// assert(this.membershipNft.exists)
 	txna Applications 0
 	byte 0x6d656d626572736869704e6674 // "membershipNft"
@@ -245,8 +235,13 @@ getMembership:
 	pop
 	assert
 
-	// contracts/nft-membership-app.algo.ts:60
-	// assert(payment.amount === this.membershipPrice.value + BOX_COST)
+	// contracts/nft-membership-app.algo.ts:58
+	// verifyPayTxn(payment, {
+	//       amount: this.membershipPrice.value + BOX_COST,
+	//       receiver: this.app.address,
+	//       sender: this.txn.sender,
+	//     })
+	// verify amount
 	frame_dig -1 // payment: PayTxn
 	gtxns Amount
 	byte 0x6d656d626572736869705072696365 // "membershipPrice"
@@ -256,64 +251,96 @@ getMembership:
 	==
 	assert
 
-	// contracts/nft-membership-app.algo.ts:61
-	// assert(payment.receiver === this.app.address)
+	// verify receiver
 	frame_dig -1 // payment: PayTxn
 	gtxns Receiver
 	global CurrentApplicationAddress
 	==
 	assert
 
-	// contracts/nft-membership-app.algo.ts:62
-	// assert(payment.sender === this.txn.sender)
+	// verify sender
 	frame_dig -1 // payment: PayTxn
 	gtxns Sender
 	txn Sender
 	==
 	assert
 
-	// contracts/nft-membership-app.algo.ts:67
+	// contracts/nft-membership-app.algo.ts:64
+	// verifyAssetTransferTxn(nftOptIn, {
+	//       sender: this.txn.sender,
+	//       xferAsset: this.membershipNft.value,
+	//       assetAmount: 0,
+	//       assetReceiver: this.txn.sender,
+	//     })
+	// verify sender
+	frame_dig -2 // nftOptIn: AssetTransferTxn
+	gtxns Sender
+	txn Sender
+	==
+	assert
+
+	// verify xferAsset
+	frame_dig -2 // nftOptIn: AssetTransferTxn
+	gtxns XferAsset
+	byte 0x6d656d626572736869704e6674 // "membershipNft"
+	app_global_get
+	==
+	assert
+
+	// verify assetAmount
+	frame_dig -2 // nftOptIn: AssetTransferTxn
+	gtxns AssetAmount
+	int 0
+	==
+	assert
+
+	// verify assetReceiver
+	frame_dig -2 // nftOptIn: AssetTransferTxn
+	gtxns AssetReceiver
+	txn Sender
+	==
+	assert
+
+	// contracts/nft-membership-app.algo.ts:71
 	// sendAssetTransfer({
 	//       xferAsset: this.membershipNft.value,
 	//       assetAmount: 1,
 	//       assetSender: this.app.address,
 	//       assetReceiver: this.txn.sender,
-	//       fee: 0,
 	//     })
 	itxn_begin
 	int axfer
 	itxn_field TypeEnum
 
-	// contracts/nft-membership-app.algo.ts:68
+	// contracts/nft-membership-app.algo.ts:72
 	// xferAsset: this.membershipNft.value
 	byte 0x6d656d626572736869704e6674 // "membershipNft"
 	app_global_get
 	itxn_field XferAsset
 
-	// contracts/nft-membership-app.algo.ts:69
+	// contracts/nft-membership-app.algo.ts:73
 	// assetAmount: 1
 	int 1
 	itxn_field AssetAmount
 
-	// contracts/nft-membership-app.algo.ts:70
+	// contracts/nft-membership-app.algo.ts:74
 	// assetSender: this.app.address
 	global CurrentApplicationAddress
 	itxn_field AssetSender
 
-	// contracts/nft-membership-app.algo.ts:71
+	// contracts/nft-membership-app.algo.ts:75
 	// assetReceiver: this.txn.sender
 	txn Sender
 	itxn_field AssetReceiver
 
-	// contracts/nft-membership-app.algo.ts:72
-	// fee: 0
+	// Fee field not set, defaulting to 0
 	int 0
 	itxn_field Fee
 
 	// Submit inner transaction
 	itxn_submit
 
-	// contracts/nft-membership-app.algo.ts:75
+	// contracts/nft-membership-app.algo.ts:78
 	// this.memberInfo(this.txn.sender).value = true
 	txn Sender
 	int 1
@@ -339,7 +366,7 @@ cancelMembership:
 	// Push empty bytes after the frame pointer to reserve space for local variables
 	byte 0x
 
-	// contracts/nft-membership-app.algo.ts:82
+	// contracts/nft-membership-app.algo.ts:85
 	// assert(this.memberInfo(this.txn.sender).value === true)
 	txn Sender
 	box_get
@@ -350,7 +377,7 @@ cancelMembership:
 	==
 	assert
 
-	// contracts/nft-membership-app.algo.ts:83
+	// contracts/nft-membership-app.algo.ts:86
 	// assert(this.membershipNft.exists)
 	txna Applications 0
 	byte 0x6d656d626572736869704e6674 // "membershipNft"
@@ -359,59 +386,57 @@ cancelMembership:
 	pop
 	assert
 
-	// contracts/nft-membership-app.algo.ts:86
+	// contracts/nft-membership-app.algo.ts:89
 	// sendAssetTransfer({
 	//       sender: this.app.address,
 	//       xferAsset: this.membershipNft.value,
 	//       assetAmount: 1,
 	//       assetSender: this.txn.sender,
 	//       assetReceiver: this.app.address,
-	//       fee: 0,
 	//     })
 	itxn_begin
 	int axfer
 	itxn_field TypeEnum
 
-	// contracts/nft-membership-app.algo.ts:87
+	// contracts/nft-membership-app.algo.ts:90
 	// sender: this.app.address
 	global CurrentApplicationAddress
 	itxn_field Sender
 
-	// contracts/nft-membership-app.algo.ts:88
+	// contracts/nft-membership-app.algo.ts:91
 	// xferAsset: this.membershipNft.value
 	byte 0x6d656d626572736869704e6674 // "membershipNft"
 	app_global_get
 	itxn_field XferAsset
 
-	// contracts/nft-membership-app.algo.ts:89
+	// contracts/nft-membership-app.algo.ts:92
 	// assetAmount: 1
 	int 1
 	itxn_field AssetAmount
 
-	// contracts/nft-membership-app.algo.ts:90
+	// contracts/nft-membership-app.algo.ts:93
 	// assetSender: this.txn.sender
 	txn Sender
 	itxn_field AssetSender
 
-	// contracts/nft-membership-app.algo.ts:91
+	// contracts/nft-membership-app.algo.ts:94
 	// assetReceiver: this.app.address
 	global CurrentApplicationAddress
 	itxn_field AssetReceiver
 
-	// contracts/nft-membership-app.algo.ts:92
-	// fee: 0
+	// Fee field not set, defaulting to 0
 	int 0
 	itxn_field Fee
 
 	// Submit inner transaction
 	itxn_submit
 
-	// contracts/nft-membership-app.algo.ts:95
+	// contracts/nft-membership-app.algo.ts:97
 	// this.memberInfo(this.txn.sender).delete()
 	txn Sender
 	box_del
 
-	// contracts/nft-membership-app.algo.ts:97
+	// contracts/nft-membership-app.algo.ts:99
 	// refundAmount = this.membershipPrice.value + BOX_COST
 	byte 0x6d656d626572736869705072696365 // "membershipPrice"
 	app_global_get
@@ -419,28 +444,26 @@ cancelMembership:
 	+
 	frame_bury 0 // refundAmount: uint64
 
-	// contracts/nft-membership-app.algo.ts:99
+	// contracts/nft-membership-app.algo.ts:101
 	// sendPayment({
 	//       amount: refundAmount,
 	//       receiver: this.txn.sender,
-	//       fee: 0,
 	//     })
 	itxn_begin
 	int pay
 	itxn_field TypeEnum
 
-	// contracts/nft-membership-app.algo.ts:100
+	// contracts/nft-membership-app.algo.ts:102
 	// amount: refundAmount
 	frame_dig 0 // refundAmount: uint64
 	itxn_field Amount
 
-	// contracts/nft-membership-app.algo.ts:101
+	// contracts/nft-membership-app.algo.ts:103
 	// receiver: this.txn.sender
 	txn Sender
 	itxn_field Receiver
 
-	// contracts/nft-membership-app.algo.ts:102
-	// fee: 0
+	// Fee field not set, defaulting to 0
 	int 0
 	itxn_field Fee
 
@@ -455,10 +478,9 @@ create_NoOp:
 	err
 
 call_NoOp:
-	method "authorizeCreator()void"
 	method "createMembershipNft(string,uint64,string,string)uint64"
 	method "getMembership(pay,axfer)void"
 	method "cancelMembership()void"
 	txna ApplicationArgs 0
-	match abi_route_authorizeCreator abi_route_createMembershipNft abi_route_getMembership abi_route_cancelMembership
+	match abi_route_createMembershipNft abi_route_getMembership abi_route_cancelMembership
 	err

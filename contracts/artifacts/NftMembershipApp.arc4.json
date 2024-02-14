@@ -3,13 +3,6 @@
   "desc": "",
   "methods": [
     {
-      "name": "authorizeCreator",
-      "args": [],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
       "name": "createApplication",
       "args": [
         {
@@ -23,7 +16,7 @@
     },
     {
       "name": "createMembershipNft",
-      "desc": "A method that creates the Membership NFTTODO: should the asset total be a power of 10? and should the decimals be 0?",
+      "desc": "A method that creates the Membership NFT",
       "args": [
         {
           "name": "name",
