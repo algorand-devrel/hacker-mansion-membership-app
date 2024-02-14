@@ -1,10 +1,10 @@
 # NFT Membership Application on Algorand
 
 This simple application uses a smart contract to distribute membership NFT when users pays for the membership fee by depositing certain amount of Algos. Users can always cancel their membership and get back their Algos they paid for the membership. Once membership is cancelled, the membership NFT is clawbacked and transferred back to the membership smart contract. 
- 
+
 To showcase Algorand Standard Asset (ASA) capabilities, the membership NFT is defaulted to be frozen and able to be clawbacked. 
 
-> Clawback & freeze feature can be disabled by setting these parameters to an empty string during asset creation or asset configuration. 
+> [Clawback & freeze feature can be permanently disabled by setting these parameters to an empty string during asset creation or asset configuration.](https://developer.algorand.org/docs/get-details/asa/?from_query=asa#template-modal-overlay:~:text=Freeze%20Address,ever%20being%20frozen.) 
 
 ## Development Environment Setup
 
