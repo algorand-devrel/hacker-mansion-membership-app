@@ -138,16 +138,15 @@ describe('NftMembershipApp', () => {
     );
 
     const accountInfo = await algod.accountInformation(testAccount.addr).do();
-    const assetList = accountInfo.assets;
-    const indexedAssetList = assetList.reduce((acc: any, obj: any) => {
-      acc[obj['asset-id']] = obj;
-      return acc;
-    }, {});
+
+    const membershipAssetInfo = accountInfo.assets.find(
+      (assetHolding: any) => assetHolding['asset-id'] === Number(membershipNft)
+    );
 
     const memberBoxList = await appClient.appClient.getBoxNames();
 
     // Check if test account no longer has the membership NFT
-    expect(indexedAssetList[Number(membershipNft)].amount).toBe(0);
+    expect(membershipAssetInfo.amount).toBe(0);
 
     // Check if the member box storage is deleted on the smart contract
     expect(memberBoxList.length).toBe(0);
