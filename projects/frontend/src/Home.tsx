@@ -103,7 +103,7 @@ const Home: React.FC<HomeProps> = () => {
               />
             )}
 
-            {appID !== 0 && <input className="input" readOnly value={membershipPrice}></input>}
+            {appID !== 0 && <input className="input" readOnly value={membershipPrice * 1e-6}></input>}
 
             <div className="divider" />
 

@@ -73,7 +73,11 @@ const NftMembershipAppCreateApplication = (props: Props) => {
 
   return (
     <div>
-      <input className="input input-bordered" type="number" onChange={(e) => setMembershipPrice(e.currentTarget.valueAsNumber)}></input>
+      <input
+        className="input input-bordered"
+        type="number"
+        onChange={(e) => setMembershipPrice(e.currentTarget.valueAsNumber * 1e6)}
+      ></input>
       <button className={props.buttonClass} onClick={callMethod}>
         {loading ? props.buttonLoadingNode || props.buttonNode : props.buttonNode}
       </button>
