@@ -1,7 +1,5 @@
 import { Contract } from '@algorandfoundation/tealscript';
 
-const BOX_COST = 2500 + 400 * (1 + 32);
-
 // eslint-disable-next-line no-unused-vars
 class NftMembershipApp extends Contract {
   membershipPrice = GlobalStateKey<uint64>();
@@ -54,9 +52,10 @@ class NftMembershipApp extends Contract {
    */
   getMembership(payment: PayTxn, nftOptIn: AssetTransferTxn): void {
     assert(this.membershipNft.exists);
+    assert(!this.memberInfo(this.txn.sender).exists || this.memberInfo(this.txn.sender).value === false);
 
     verifyPayTxn(payment, {
-      amount: this.membershipPrice.value + BOX_COST,
+      amount: this.membershipPrice.value,
       receiver: this.app.address,
       sender: this.txn.sender,
     });
@@ -96,7 +95,7 @@ class NftMembershipApp extends Contract {
 
     this.memberInfo(this.txn.sender).delete();
 
-    const refundAmount = this.membershipPrice.value + BOX_COST;
+    const refundAmount = this.membershipPrice.value;
 
     sendPayment({
       amount: refundAmount,

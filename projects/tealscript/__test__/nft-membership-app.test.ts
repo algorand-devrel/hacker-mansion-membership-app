@@ -14,7 +14,6 @@ let algod: algosdk.Algodv2;
 let appId: number | bigint;
 let testAccount: algosdk.Account;
 let membershipNft: bigint | undefined;
-const BOX_COST = 2500 + 400 * (1 + 32);
 
 describe('NftMembershipApp', () => {
   beforeEach(fixture.beforeEach);
@@ -92,7 +91,7 @@ describe('NftMembershipApp', () => {
       from: testAccount.addr,
       to: appAddr,
       suggestedParams: sp,
-      amount: 1000000 + BOX_COST,
+      amount: 1000000,
     });
 
     const optIntoNft = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({

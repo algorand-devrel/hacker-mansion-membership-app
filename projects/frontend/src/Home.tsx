@@ -7,8 +7,11 @@ import { NftMembershipAppClient } from './contracts/NftMembershipAppClient'
 import * as algokit from '@algorandfoundation/algokit-utils'
 import { getAlgodConfigFromViteEnvironment } from './utils/network/getAlgoClientConfigs'
 import NftMembershipAppCreateApplication from './components/NftMembershipAppCreateApplication'
+import NftMembershipAppGetMembership from './components/NftMembershipAppGetMembership'
 
 interface HomeProps {}
+
+algokit.Config.configure({ populateAppCallResources: true })
 
 const Home: React.FC<HomeProps> = () => {
   const [openWalletModal, setOpenWalletModal] = useState<boolean>(false)
@@ -50,6 +53,7 @@ const Home: React.FC<HomeProps> = () => {
         setMembershipNft(state.membershipNft!.asNumber())
         setMembershipPrice(state.membershipPrice!.asNumber())
       } catch {
+        // eslint-disable-next-line no-console
         console.error('App not found')
         setMembershipNft(0)
         setMembershipPrice(0)
@@ -102,6 +106,16 @@ const Home: React.FC<HomeProps> = () => {
             {appID !== 0 && <input className="input" readOnly value={membershipPrice}></input>}
 
             <div className="divider" />
+
+            <NftMembershipAppGetMembership
+              buttonClass="btn m-2"
+              buttonLoadingNode={<span className="loading loading-spinner" />}
+              buttonNode="Register Membership"
+              typedClient={typedClient}
+              algodClient={algodClient}
+              membershipNft={membershipNft}
+              membershipPrice={membershipPrice}
+            />
           </div>
 
           <ConnectWallet openModal={openWalletModal} closeModal={toggleWalletModal} />
