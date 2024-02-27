@@ -1,6 +1,6 @@
 // src/components/Home.tsx
 import { useWallet } from '@txnlab/use-wallet'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import ConnectWallet from './components/ConnectWallet'
 import Transact from './components/Transact'
 import { NftMembershipAppClient } from './contracts/NftMembershipAppClient'
@@ -14,6 +14,8 @@ const Home: React.FC<HomeProps> = () => {
   const [openWalletModal, setOpenWalletModal] = useState<boolean>(false)
   const [openDemoModal, setOpenDemoModal] = useState<boolean>(false)
   const [appID, setAppID] = useState<number>(0)
+  const [membershipNft, setMembershipNft] = useState<number>(0)
+  const [membershipPrice, setMembershipPrice] = useState<number>(0)
 
   const { activeAddress } = useWallet()
 
@@ -36,6 +38,24 @@ const Home: React.FC<HomeProps> = () => {
     },
     algodClient,
   )
+
+  useEffect(() => {
+    if (appID === 0) {
+      return
+    }
+
+    ;(async () => {
+      try {
+        const state = await typedClient.getGlobalState()
+        setMembershipNft(state.membershipNft!.asNumber())
+        setMembershipPrice(state.membershipPrice!.asNumber())
+      } catch {
+        console.error('App not found')
+        setMembershipNft(0)
+        setMembershipPrice(0)
+      }
+    })()
+  }, [appID])
 
   return (
     <div className="hero min-h-screen bg-teal-400">
@@ -64,6 +84,10 @@ const Home: React.FC<HomeProps> = () => {
               onChange={(e) => setAppID(e.currentTarget.valueAsNumber || 0)}
             />
 
+            <div className="divider" />
+
+            <h1 className="font-bold m-2">Membership Price</h1>
+
             {activeAddress && appID === 0 && (
               <NftMembershipAppCreateApplication
                 buttonClass="btn m-2"
@@ -74,6 +98,8 @@ const Home: React.FC<HomeProps> = () => {
                 setAppID={setAppID}
               />
             )}
+
+            {appID !== 0 && <input className="input" readOnly value={membershipPrice}></input>}
 
             <div className="divider" />
           </div>

@@ -26,6 +26,7 @@ type Props = {
 
 const NftMembershipAppCreateApplication = (props: Props) => {
   const [loading, setLoading] = useState<boolean>(false)
+  const [membershipPrice, setMembershipPrice] = useState<number>(0)
   const { activeAddress, signer } = useWallet()
   const sender = { signer, addr: activeAddress! }
 
@@ -34,7 +35,7 @@ const NftMembershipAppCreateApplication = (props: Props) => {
     console.log(`Calling createApplication`)
     await props.typedClient.create.createApplication(
       {
-        membershipPrice: 0,
+        membershipPrice,
       },
       { sender },
     )
@@ -71,9 +72,12 @@ const NftMembershipAppCreateApplication = (props: Props) => {
   }
 
   return (
-    <button className={props.buttonClass} onClick={callMethod}>
-      {loading ? props.buttonLoadingNode || props.buttonNode : props.buttonNode}
-    </button>
+    <div>
+      <input className="input input-bordered" type="number" onChange={(e) => setMembershipPrice(e.currentTarget.valueAsNumber)}></input>
+      <button className={props.buttonClass} onClick={callMethod}>
+        {loading ? props.buttonLoadingNode || props.buttonNode : props.buttonNode}
+      </button>
+    </div>
   )
 }
 
