@@ -8,6 +8,7 @@ import * as algokit from '@algorandfoundation/algokit-utils'
 import { getAlgodConfigFromViteEnvironment } from './utils/network/getAlgoClientConfigs'
 import NftMembershipAppCreateApplication from './components/NftMembershipAppCreateApplication'
 import NftMembershipAppGetMembership from './components/NftMembershipAppGetMembership'
+import NftMembershipAppCancelMembership from './components/NftMembershipAppCancelMembership'
 
 interface HomeProps {}
 
@@ -115,6 +116,13 @@ const Home: React.FC<HomeProps> = () => {
               algodClient={algodClient}
               membershipNft={membershipNft}
               membershipPrice={membershipPrice}
+            />
+
+            <NftMembershipAppCancelMembership
+              buttonClass="btn m-2"
+              buttonLoadingNode={<span className="loading loading-spinner" />}
+              buttonNode="Cancel Membership"
+              typedClient={typedClient}
             />
           </div>
 
