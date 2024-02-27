@@ -18,6 +18,7 @@ type Props = {
   buttonLoadingNode?: ReactNode
   buttonNode: ReactNode
   typedClient: NftMembershipAppClient
+  setIsMember: (isMember: boolean) => void
 }
 
 const NftMembershipAppCancelMembership = (props: Props) => {
@@ -30,6 +31,7 @@ const NftMembershipAppCancelMembership = (props: Props) => {
     console.log(`Calling cancelMembership`)
     await props.typedClient.cancelMembership({}, { sender, sendParams: { fee: microAlgos(3_000) } })
     setLoading(false)
+    props.setIsMember(false)
   }
 
   return (

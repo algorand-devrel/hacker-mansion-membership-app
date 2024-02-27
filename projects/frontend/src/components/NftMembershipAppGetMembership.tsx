@@ -24,6 +24,7 @@ type Props = {
   membershipPrice: number
   membershipNft: number
   algodClient: algosdk.Algodv2
+  setIsMember: (isMember: boolean) => void
 }
 
 const NftMembershipAppGetMembership = (props: Props) => {
@@ -60,6 +61,7 @@ const NftMembershipAppGetMembership = (props: Props) => {
       { sender, sendParams: { fee: microAlgos(2_000) } },
     )
     setLoading(false)
+    props.setIsMember(true)
   }
 
   return (

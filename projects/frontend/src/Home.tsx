@@ -20,6 +20,7 @@ const Home: React.FC<HomeProps> = () => {
   const [appID, setAppID] = useState<number>(0)
   const [membershipNft, setMembershipNft] = useState<number>(0)
   const [membershipPrice, setMembershipPrice] = useState<number>(0)
+  const [isMember, setIsMember] = useState<boolean>(false)
 
   const { activeAddress } = useWallet()
 
@@ -53,6 +54,13 @@ const Home: React.FC<HomeProps> = () => {
         const state = await typedClient.getGlobalState()
         setMembershipNft(state.membershipNft!.asNumber())
         setMembershipPrice(state.membershipPrice!.asNumber())
+
+        try {
+          const acctAssetInfo = await algodClient.accountAssetInformation(activeAddress!, membershipNft).do()
+          setIsMember(acctAssetInfo.amount > 0)
+        } catch {
+          setIsMember(false)
+        }
       } catch {
         // eslint-disable-next-line no-console
         console.error('App not found')
@@ -60,7 +68,7 @@ const Home: React.FC<HomeProps> = () => {
         setMembershipPrice(0)
       }
     })()
-  }, [appID])
+  }, [appID, activeAddress])
 
   return (
     <div className="hero min-h-screen bg-teal-400">
@@ -108,22 +116,28 @@ const Home: React.FC<HomeProps> = () => {
 
             <div className="divider" />
 
-            <NftMembershipAppGetMembership
-              buttonClass="btn m-2"
-              buttonLoadingNode={<span className="loading loading-spinner" />}
-              buttonNode="Register Membership"
-              typedClient={typedClient}
-              algodClient={algodClient}
-              membershipNft={membershipNft}
-              membershipPrice={membershipPrice}
-            />
+            {activeAddress && appID !== 0 && !isMember && (
+              <NftMembershipAppGetMembership
+                buttonClass="btn m-2"
+                buttonLoadingNode={<span className="loading loading-spinner" />}
+                buttonNode="Register Membership"
+                typedClient={typedClient}
+                algodClient={algodClient}
+                membershipNft={membershipNft}
+                membershipPrice={membershipPrice}
+                setIsMember={setIsMember}
+              />
+            )}
 
-            <NftMembershipAppCancelMembership
-              buttonClass="btn m-2"
-              buttonLoadingNode={<span className="loading loading-spinner" />}
-              buttonNode="Cancel Membership"
-              typedClient={typedClient}
-            />
+            {activeAddress && appID !== 0 && isMember && (
+              <NftMembershipAppCancelMembership
+                buttonClass="btn m-2"
+                buttonLoadingNode={<span className="loading loading-spinner" />}
+                buttonNode="Cancel Membership"
+                typedClient={typedClient}
+                setIsMember={setIsMember}
+              />
+            )}
           </div>
 
           <ConnectWallet openModal={openWalletModal} closeModal={toggleWalletModal} />
