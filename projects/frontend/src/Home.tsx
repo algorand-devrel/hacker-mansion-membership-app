@@ -97,6 +97,12 @@ const Home: React.FC<HomeProps> = () => {
               onChange={(e) => setAppID(e.currentTarget.valueAsNumber || 0)}
             />
 
+            {membershipNft > 0 && (
+              <a className="link" href={`https://app.dappflow.org/explorer/nft/${membershipNft}/transactions`}>
+                Membership NFT
+              </a>
+            )}
+
             <div className="divider" />
 
             <h1 className="font-bold m-2">Membership Price</h1>

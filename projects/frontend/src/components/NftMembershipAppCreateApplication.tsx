@@ -59,7 +59,7 @@ const NftMembershipAppCreateApplication = (props: Props) => {
           name: 'Membership NFT',
           unitName: 'MEM',
           total: 100,
-          assetUrl: 'ipfs://bafkreibrr2cpyb6azlystftvf4uba4qt5v2ihdq43xtdefactz3j7snmvy',
+          assetUrl: 'ipfs://QmafQYTHTXwR6uMf39tgTtg4Xa2x2TYtWAJdJNAYqkNraV#arc3',
         },
         { sender, sendParams: { fee: microAlgos(2_000) } },
       )
@@ -76,6 +76,7 @@ const NftMembershipAppCreateApplication = (props: Props) => {
       <input
         className="input input-bordered"
         type="number"
+        defaultValue={1}
         onChange={(e) => setMembershipPrice(e.currentTarget.valueAsNumber * 1e6)}
       ></input>
       <button className={props.buttonClass} onClick={callMethod}>
