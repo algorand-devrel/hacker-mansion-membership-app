@@ -1,16 +1,25 @@
 import { Contract } from '@algorandfoundation/tealscript';
 
 export class NftMembershipApp extends Contract {
+  /** The price of membership */
   membershipPrice = GlobalStateKey<uint64>();
 
+  /** The asset ID of the membership NFT */
   membershipNft = GlobalStateKey<Asset>();
 
+  /** Whether the given address is a member or not */
   memberInfo = BoxMap<Address, boolean>();
 
+  /** Ensure the caller is the app creator */
   private authorizeCreator(): void {
     assert(this.app.creator === this.txn.sender);
   }
 
+  /**
+   * Create the application
+   *
+   * @param membershipPrice The price of membership (in uALGO)
+   */
   createApplication(membershipPrice: uint64): void {
     this.membershipPrice.value = membershipPrice;
   }
