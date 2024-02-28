@@ -18,10 +18,10 @@ export class NftMembershipApp extends Contract {
   /**
    * A method that creates the Membership NFT
    *
-   * @param name
-   * @param total
-   * @param unitName
-   * @param assetUrl
+   * @param name The name of the token
+   * @param total The total amount of the token we should mint
+   * @param unitName The short name for the token (e.g. "USDC")
+   * @param assetUrl The URL pointing to the NFT metadata
    */
   createMembershipNft(name: string, total: uint64, unitName: string, assetUrl: string): Asset {
     this.authorizeCreator();
@@ -47,7 +47,8 @@ export class NftMembershipApp extends Contract {
   /**
    * A method that allows a user to purchase a membership
    *
-   * @param payment
+   * @param payment The users payment to the application
+   * @param nftOptIn The users opt-in transaction to the membership NFT
    */
   getMembership(payment: PayTxn, nftOptIn: AssetTransferTxn): void {
     assert(this.membershipNft.exists);
