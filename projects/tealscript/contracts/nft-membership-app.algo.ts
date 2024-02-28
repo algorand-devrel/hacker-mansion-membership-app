@@ -1,7 +1,6 @@
 import { Contract } from '@algorandfoundation/tealscript';
 
-// eslint-disable-next-line no-unused-vars
-class NftMembershipApp extends Contract {
+export class NftMembershipApp extends Contract {
   membershipPrice = GlobalStateKey<uint64>();
 
   membershipNft = GlobalStateKey<Asset>();
