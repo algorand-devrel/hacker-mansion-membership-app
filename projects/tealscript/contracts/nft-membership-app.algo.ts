@@ -5,7 +5,7 @@ export class NftMembershipApp extends Contract {
   membershipPrice = GlobalStateKey<uint64>();
 
   /** The asset ID of the membership NFT */
-  membershipNft = GlobalStateKey<Asset>();
+  membershipNft = GlobalStateKey<AssetID>();
 
   /** Whether the given address is a member or not */
   memberInfo = BoxMap<Address, boolean>();
@@ -32,7 +32,7 @@ export class NftMembershipApp extends Contract {
    * @param unitName The short name for the token (e.g. "USDC")
    * @param assetUrl The URL pointing to the NFT metadata
    */
-  createMembershipNft(name: string, total: uint64, unitName: string, assetUrl: string): Asset {
+  createMembershipNft(name: string, total: uint64, unitName: string, assetUrl: string): AssetID {
     this.authorizeCreator();
 
     const createdAsset = sendAssetCreation({

@@ -4,10 +4,12 @@
   "methods": [
     {
       "name": "createApplication",
+      "desc": "Create the application",
       "args": [
         {
           "name": "membershipPrice",
-          "type": "uint64"
+          "type": "uint64",
+          "desc": "The price of membership (in uALGO)"
         }
       ],
       "returns": {
