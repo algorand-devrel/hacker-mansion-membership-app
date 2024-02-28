@@ -112,14 +112,12 @@ describe('NftMembershipApp', () => {
       new algosdk.ABIBoolType()
     );
     const accountInfo = await algod.accountInformation(testAccount.addr).do();
-    const assetList = accountInfo.assets;
-    const indexedAssetList = assetList.reduce((acc: any, obj: any) => {
-      acc[obj['asset-id']] = obj;
-      return acc;
-    }, {});
+    const membershipAssetInfo = accountInfo.assets.find(
+      (assetHolding: any) => assetHolding['asset-id'] === Number(membershipNft)
+    );
 
     // Check if the test account received the membership Nft
-    expect(indexedAssetList[Number(membershipNft)].amount).toBe(1);
+    expect(membershipAssetInfo.amount).toBe(1);
 
     // Check if the account's member box storage is created and the deposited value is set to true.
     expect(memberInfo.valueOf()).toBe(true);

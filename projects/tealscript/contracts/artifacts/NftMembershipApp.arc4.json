@@ -20,19 +20,23 @@
       "args": [
         {
           "name": "name",
-          "type": "string"
+          "type": "string",
+          "desc": "The name of the token"
         },
         {
           "name": "total",
-          "type": "uint64"
+          "type": "uint64",
+          "desc": "The total amount of the token we should mint"
         },
         {
           "name": "unitName",
-          "type": "string"
+          "type": "string",
+          "desc": "The short name for the token (e.g. \"USDC\")"
         },
         {
           "name": "assetUrl",
-          "type": "string"
+          "type": "string",
+          "desc": "The URL pointing to the NFT metadata"
         }
       ],
       "returns": {
@@ -45,11 +49,13 @@
       "args": [
         {
           "name": "payment",
-          "type": "pay"
+          "type": "pay",
+          "desc": "The users payment to the application"
         },
         {
           "name": "nftOptIn",
-          "type": "axfer"
+          "type": "axfer",
+          "desc": "The users opt-in transaction to the membership NFT"
         }
       ],
       "returns": {
